@@ -2,101 +2,22 @@
 #from selenium import webdriver as webdriver
 #from selenium.webdriver.common.keys import Keys
 
-import subprocess
-from subprocess import Popen, PIPE, STDOUT
-
 from datetime import datetime as dt
 from datetime import date
 
-import sys
-from sys import platform
-import time
-import random as rm
+from functions import *
+from options import *
+import american
 
-import pyautogui as pygui
-
-from appscript import app, k
-
-#this doesn't work on mac, maybe it will work on windows
-import pyperclip
-
-import parser
-
-#American Airlines url
-def aa_url():
-	return 'https://www.aa.com/homePage.do'
 #Delta url
-def delta():
+def delta_url():
 	return 'https://www.delta.com/'
 #United url
-def united():
+def united_url():
 	return 'https://www.united.com/ual/en/us/'
 #Southwest url
-def southwest():
+def southwest_url():
 	return 'https://www.southwest.com/'
-
-
-def delaytime():
-	return 1.5
-
-
-def sleepRandom():
-	time.sleep(rm.uniform(0.5, 1.5))
-def type(str):
-	for c in str:
-		app('System Events').keystroke(c)
-		time.sleep(rm.uniform(.15, .2))
-def moveMouse(x, y):
-	pygui.moveTo(x, y, duration=rm.uniform(0.3, 0.7))
-def backspace(x):
-	for i in range(x):
-		pygui.hotkey('backspace')
-		time.sleep(rm.uniform(.05, .15))
-
-assert (platform == 'linux' or platform == 'linux2' or platform == 'darwin' or platform == 'win32'), 'platform not found'
-
-if platform == 'linux' or platform == 'linux2': #linux (obviously)
-	def copy():
-		pygui.hotkey('ctrl', 'shift', 'c')
-		time.sleep(rm.uniform(.05, .15))
-	def selectAll():
-		pygui.hotkey('ctrl', 'shift', 'a')
-		time.sleep(rm.uniform(.05, .15))
-	def enter():
-		pygui.hotkey('enter')
-		time.sleep(rm.uniform(.05, .15))
-elif platform == 'darwin': #mac os
-	def copy():
-		#app('System Events').keystroke('c', using=k.command_down)
-		pygui.hotkey('command', 'c')
-		time.sleep(rm.uniform(.05, .15))
-	def selectAll():
-		#app('System Events').keystroke('a', using=k.command_down)
-		pygui.hotkey('command', 'a')
-		time.sleep(rm.uniform(.05, .15))
-	def enter():
-		pygui.hotkey('return')
-		time.sleep(rm.uniform(.05, .15))
-elif platform == 'win32': #windows
-	def copy():
-		pygui.hotkey('ctrl', 'c')
-		time.sleep(rm.uniform(.05, .15))
-	def selectAll():
-		pygui.hotkey('ctrl', 'a')
-		time.sleep(rm.uniform(.05, .15))
-	def enter():
-		pygui.hotkey('enter')
-		time.sleep(rm.uniform(.05, .15))
-
-
-
-#departing airport
-round_trip = True
-departing_airport = 'ORD' #london heathrow
-arriving_airport = 'LAX' #chicago
-number_passangers = 1
-departing_date = '7/20/2018'
-returning_date = '7/30/2018'
 
 
 assert (number_passangers > 0 and number_passangers < 7), 'invalid number of passengers'
@@ -106,192 +27,22 @@ assert (dt.strptime(departing_date, '%m/%d/%Y') >= dt.strptime(today, '%m/%d/%Y'
 
 assert ( (dt.strptime(returning_date, '%m/%d/%Y') >= dt.strptime(departing_date, '%m/%d/%Y')) or one_way ), 'invalid return date'
 
+#for round trips, I need to have it look at one way flights for each way in order to see if there is a cheaper flight combinination by using one airline for each direction
+american.run()
 
-#american airlines
-p = Popen(['open', aa_url()], stdin=PIPE, stdout=PIPE)
-
-#let the website load
-time.sleep(5)
-
-#round trip
-if round_trip:
-	moveMouse(494, 633)
-	sleepRandom()
-	pygui.click(494, 633)
-#one way
-else:
-	moveMouse(584, 635)
-	sleepRandom()
-	pygui.click(584, 635)
-
-sleepRandom()
-
-#departing location
-moveMouse(554, 749)
-sleepRandom()
-pygui.click(554, 749)
-
-sleepRandom()
-
-backspace(3)
-type(departing_airport)
-
-#arriving location
-moveMouse(772, 749)
-sleepRandom()
-pygui.click(772, 749)
-
-sleepRandom()
-
-backspace(3)
-type(arriving_airport)
-
-#number of passengers
-moveMouse(995, 749)
-sleepRandom()
-pygui.click(995, 749)
-
-sleepRandom()
-
-type(str(number_passangers))
-
-sleepRandom()
-
-#this may not be universal
-enter()
-
-'''pygui.moveTo(995, 749, duration=rm.uniform(min(), max()))
-sleepRandom()
-pygui.click(995, 749)'''
-
-sleepRandom()
-
-#scroll down
-pygui.scroll(-10)
-
-#select the departure date range
-moveMouse(554, 427)
-sleepRandom()
-pygui.click(554, 427)
-
-backspace(10)
-type(departing_date)
-
-sleepRandom()
-
-if round_trip:
-	moveMouse(772, 427)
-	sleepRandom()
-	pygui.click(772, 427)
-
-	sleepRandom()
-
-	backspace(10)
-	type(returning_date)
-
-	sleepRandom()
-
-#search for flights
-moveMouse(995, 427)
-sleepRandom()
-pygui.click(995, 427)
-
-#let the new website load
-time.sleep(10)
-
-'''
-pygui.moveTo(660, 53, duration=rm.uniform(min(), max()))
-sleepRandom()
-pygui.click(660, 53)
-
-app('System Events').keystroke('a', using=k.command_down)
-#pygui.hotkey('command', 'a')
-sleepRandom()
-app('System Events').keystroke('c', using=k.command_down)
-#pygui.hotkey('command', 'a')
-
-url = subprocess.check_output('pbpaste', env={'LANG': 'en_US.UTF-8'}).decode('utf-8')
-#url = pyperclip.paste()
-print(url)
-'''
-
-time.sleep(5)
-
-#view-source in chrome
-#this is not universal
-#app('System Events').keystroke('u', using=[k.command_down, k.option_down])
-pygui.hotkey('command', 'option', 'u')
-
-time.sleep(10)
-
-moveMouse(700, 400)
-sleepRandom()
-pygui.click(700, 400)
-
-
-selectAll()
-
-sleepRandom()
-
-copy()
-
-time.sleep(2)
-
-#html from webpage
-#this is a Mac OS Specific Command (I think)
-html = subprocess.check_output('pbpaste', env={'Lang': 'en_US.UTF-8'})
-
-text = ''
-for c in html:
-	try:
-		text += str(chr(c))
-	except:
-		text += ' '
-
-with open('scraper4.html', 'w') as f:
-	f.write(text)
-	f.close()
-
-moveMouse(700, 400)
-sleepRandom()
-pygui.click(700, 400)
-
-pygui.hotkey('command', 'w')
-sleepRandom()
-
-moveMouse(700, 400)
-sleepRandom()
-pygui.click(700, 400)
-
-pygui.hotkey('command', 'w')
-sleepRandom()
-
-parser.parse()
-
-#start by parsing this html
-
-
-#they really don't like selenium
-'''
+#it looks like doing this for delta will be very difficult due to their calendar configuration
 driver = webdriver.Chrome()
-driver.get(url)
+driver.get(delta_url())
 
-#wait for website to load
-time.sleep(2)
+driver.find_element_by_xpath('//*[@id="selectTripType-val"]').click()
 
-flight = 1
-while True:
-	try:
-		elem = driver.find_element_by_xpath('//*[@id="slice0Flight' + str(flight) + '"]')
-		print()
-		print(elem.get_attribute('innerHTML'))
-		flight += 1
-	except:
-		break
-'''
+if round_trip:
+	driver.find_element_by_xpath('//*[@id="ui-list-selectTripType0"]').click()
+else:
+	driver.find_element_by_xpath('//*[@id="ui-list-selectTripType1"]').click()
 
-#//*[@id="flight0SeatsLink"]
-#//*[@id="flight1SeatsLink"]
+elem = driver.find_element_by_xpath('//*[@id="calDepartLabelCont"]/span[2]')
+
 
 #American Airline's Website detects and blocks selenium, RIP
 '''#check the aa website
